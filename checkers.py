@@ -535,7 +535,12 @@ def run_games(first_agent, second_agent, first_agent_turn, num_games, update_par
 
             if second_agent.has_been_learning_agent and update_param:
                 second_agent.update_parameters(update_param, (i+1))
-
+            #-------------------------------
+            #Printing result
+            if game_state.is_first_agent_win():
+                print(type(first_agent).__name__)
+            elif game_state.is_second_agent_win():
+                print(type(second_agent).__name__)
 
     except Exception as e:
         print(sys.exc_info()[0])
@@ -593,6 +598,7 @@ if __name__ == '__main__':
     # print(game_state.player_info())
 
     start_time = time.time()
-    args = read_command(sys.argv[1:])
+    args = read_command(sys.argv[3:]) #Changed to work with Eclipse-triggered execution
+    #args = read_command(sys.argv[1:])
     run_games(**args)
     print(time.time() - start_time)
