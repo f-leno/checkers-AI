@@ -1,5 +1,5 @@
 """
-    Simple implementation of QLearning for the tic tac toe domain
+    Implementation of Q-Learning with Linear Q-function approximation
     
     Author: Felipe Leno (f.leno@usp.br)
 
@@ -15,8 +15,8 @@ class QLearningAgent(Agent):
     gamma = None
     alpha = None
     
-    qTable = None
-    initQ = None #Value to initiate Q-table
+    qWeights = None
+    initQ = None #Value to initiate the weights
     
     USE_EPSILON_GREEDY = True #If false, uses Boltzmann exploration
     epsilon = 0.1
@@ -44,8 +44,9 @@ class QLearningAgent(Agent):
         self.alpha = alpha
         self.marker = marker
         
-        self.qTable = {}
-        self.initQ = 0.0
+        self.initQ = 0.001
+        
+        
         self.T = self.tempInit;
         self.rnd = Seeds().Q_AGENT_SEED
         
@@ -57,28 +58,31 @@ class QLearningAgent(Agent):
             Updates the Q-table (only if the agent is exploring
         """
         if self.exploring:
-            #print("UPDATING")
-            state = self.process_state(state)
             allActionsPrime = self.environment.get_actions(statePrime)
-            statePrime = self.process_state(statePrime)
-            #Regular q-update
-            qValue= self.readQTable(state,action)
-            V = self.get_max_Q_value(statePrime,allActionsPrime)        
-            newQ = qValue + self.alpha * (reward + self.gamma * V - qValue)
-            self.qTable[(state,action)] = newQ
+           
+           
+            qValue, features = self.calcQTable(state,action)
+            V = self.get_max_Q_value(statePrime,allActionsPrime)
+            expected = reward + self.gamma * V
             
-    def readQTable(self,state,action):             
+            temporal_difference = expected - qValue         
+
+            for i in range(len(self.qWeights)):
+                self.qWeights[i] = self.qWeights[i] + self.alpha * (temporal_difference) * features[i] 
+            
+    def calcQTable(self,state,action):             
         """Returns one value from the Qtable"""
-        if not (state,action) in self.qTable:
-            self.qTable[(state,action)] = self.initQ
-        return self.qTable[(state,action)]  
+        features = self.process_state(state,action)
+        qValue = np.dot(self.weights, features)
+        
+        return qValue,features  
     
     def best_action_deterministic(self,state):
         allActions = self.environment.get_actions(state)
         maxVal = -float('inf')
         bestAct = None
         for act in allActions:
-            q = self.readQTable(state, act)
+            q = self.calcQTable(state, act)
             if q > maxVal:
                 bestAct = [act]
                 maxVal = q
@@ -96,14 +100,14 @@ class QLearningAgent(Agent):
 
     def select_action_boltzmann(self,state):
         #Check here
-        state = self.process_state(state)
+        
         allActions = self.environment.get_actions()
         #Boltzmann exploration strategy
         valueActions = []
         sumActions = 0
             
         for action in allActions:
-            qValue = self.readQTable(state,action)
+            qValue = self.calcQTable(state,action)
             vBoltz = math.pow(math.e,qValue/self.T)
             valueActions.append(vBoltz)
             sumActions += vBoltz
@@ -130,8 +134,7 @@ class QLearningAgent(Agent):
             Applies the epsilon greedy exploration when the agent is exploring,
             and chooses deterministically 
         """
-        state = self.process_state(state)
-        
+                
         randv = self.rnd.random()
         if self.exploring and randv < self.epsilon:
             return self.rnd.choice(self.environment.get_actions())
@@ -145,7 +148,7 @@ class QLearningAgent(Agent):
             returns max(Q) for all actions given a state
         """
         
-        values = [self.readQTable(state, action) for action in allActions]
+        values = [self.calcQTable(state, action) for action in allActions]
         #Terminal states don't have applicable actions
         if len(values) == 0:
             return 0
