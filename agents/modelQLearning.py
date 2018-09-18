@@ -1,5 +1,5 @@
 """
-    Abstract class for agents that build a model of the opponent.
+    Abstract class for agents_checker that build a model of the opponent.
     Concrete classes must implement: (i) how to initialize the model; (ii) how to update the model with new instances;
     (iii) how to create a fictitious agent from the model.
     Author: Felipe Leno (f.leno@usp.br)

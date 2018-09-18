@@ -88,7 +88,7 @@ class GameState:
         Returns: False if game is still on or first agent has lost and True iff first agent has won
         """
 
-        # If max moves has reached, none of the agents has won
+        # If max moves has reached, none of the agents_checker has won
         if self.max_moves_done:
             return False
 
@@ -102,7 +102,7 @@ class GameState:
         Returns: False if game is still on or second agent has lost and True iff second agent has won
         """
 
-        # If max moves has reached, none of the agents has won
+        # If max moves has reached, none of the agents_checker has won
         if self.max_moves_done:
             return False
 
@@ -254,7 +254,7 @@ def read_command(argv):
 
     parser.add_option('-l', '--agentFirstLearn', dest='first_agent_learn', type='int',
                       help=default('the first agent of game is learning ' +
-                        '(only applicable for learning agents)'), default=1)
+                        '(only applicable for learning agents_checker)'), default=1)
 
 
     parser.add_option('-s', '--agentSecondType', dest='second_agent', type='string',
@@ -262,7 +262,7 @@ def read_command(argv):
 
     parser.add_option('-d', '--agentsecondLearn', dest='second_agent_learn', type='int',
                       help=default('the second agent of game is learning ' +
-                        '(only applicable for learning agents)'), default=1)
+                        '(only applicable for learning agents_checker)'), default=1)
 
 
     parser.add_option('-t', '--turn', dest='turn', type='int', 
@@ -309,7 +309,7 @@ def read_command(argv):
 
     parser.add_option('-p', '--playSelf', dest='play_against_self', type='int',
                       help=default('whether first agent is to play agains itself (only' +
-                        'for rl agents)'), default=0)
+                        'for rl agents_checker)'), default=0)
 
 
     options, garbage = parser.parse_args(argv)

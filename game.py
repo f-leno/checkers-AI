@@ -406,7 +406,7 @@ def checkers_features(state, action):
 def checkers_reward(state, action, next_state):
 
     if next_state.is_game_over():
-        # infer turn from current state, because at the end same state is used by both agents
+        # infer turn from current state, because at the end same state is used by both agents_checker
         if state.is_first_agent_turn():
             return WIN_REWARD if next_state.is_first_agent_win() else LOSE_REWARD
         else:
@@ -446,7 +446,7 @@ def checkers_reward(state, action, next_state):
 
 class Game:
     """
-    A class to control a game by asking for actions from agents while following game rules.
+    A class to control a game by asking for actions from agents_checker while following game rules.
     """
 
     def __init__(self, first_agent, second_agent, game_state, rules):
@@ -476,7 +476,7 @@ class Game:
         if self.second_agent.is_learning_agent:
             learning_agents.append(self.second_agent)
 
-        # inform learning agents about new episode start
+        # inform learning agents_checker about new episode start
         for learning_agent in learning_agents:
             learning_agent.start_episode()
 
@@ -514,9 +514,9 @@ class Game:
         if num_moves >= self.rules.max_moves:
             game_state.set_max_moves_done()
 
-        # after the game is over, tell learning agents to learn accordingly
+        # after the game is over, tell learning agents_checker to learn accordingly
 
-        # inform learning agents about new episode end
+        # inform learning agents_checker about new episode end
         for learning_agent in learning_agents:
             learning_agent.observation_function(game_state)
             learning_agent.stop_episode()

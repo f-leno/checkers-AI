@@ -1,15 +1,17 @@
 """
 Tic Tac Toe Experiment Class.
-This class will define which agents will be learning in the environment,
+This class will define which agents_checker will be learning in the environment,
 whether if a GUI should be shown, and initiate all learning process.
  
  Author: Felipe Leno (f.leno@usp.br) 
 
 """
 
-from agents.expertTicTacToeAgent import ExpertTicTacToeAgent
+from agents.expertCheckersAgent import ExpertCheckersAgent
+
+from environment.checkersEnvironment import CheckersEnvironment
+
 from output.nullExperimentRecorder import NullExperimentRecorder
-from environment.ticTacToeEnvironment import TicTacToeEnvironment
 
 
 class ExperimentCheckers:
@@ -76,7 +78,7 @@ class ExperimentCheckers:
         
     def swap_agents(self):
         """
-            The agents swap side
+            The agents_checker swap side
         """
         aux = self.agentO
         self.agentO = self.agentX
@@ -87,44 +89,60 @@ class ExperimentCheckers:
         """
             Runs the experiment according to the given parameters
         """
-        #Give references to agents and environment
+        #Give references to agents_checker and environment
         self.agentO.set_environment(self.environment, "O")
         self.agentX.set_environment(self.environment, "X")
         self.environment.set_agents(self.agentO,self.agentX)
         
-        
+        rewardO = 0
+        actionO = None
         #Main perception-action loop
         while not self.stop_learning():
-            #In this loop the turn of the two agents will be processed, unless the game is over
+            #In this loop the turn of the two agents_checker will be processed, unless the game is over
             stateX = self.environment.get_state()
             #Get agent action
             actionX = self.agentX.select_action(stateX)
             #Applies state transition
-            self.environment.step(actionX,"X")
-            
+            self.environment.step(actionX)
 
             
             #If this is a terminal state, "O" lost the game and should be updated, 
             #If this is not the case, the agent makes its move
+            stateO = self.environment.get_state() 
             if not self.environment.terminal_state():
-                #Making the move...
-                stateO = self.environment.get_state()
-                self.recordStateO = stateO
+                #Making the move...         
                 actionO = self.agentO.select_action(stateO)
-                self.recordActionO = actionO
-                self.environment.step(actionO,"O")
-            else:
-                stateO = self.recordStateO
-                actionO = self.recordActionO
+                self.environment.step(actionO)
+
+                
+
             #Updating...
             statePrime = self.environment.get_state()
+            
+            #Process rewards for agent X
+            self.environment.process_rewards(pastState = stateX,currentState=statePrime,agentMarker='X')
+            
+            #Process rewards for agent O
+            if self.recordStateO is not None:
+                self.environment.process_rewards(pastState = self.recordStateO,currentState=stateO,agentMarker='O')
+                rewardO = self.environment.get_last_rewardO()
+                self.agentO.observe_reward(self.recordStateO,self.recordActionO,stateO,rewardO)
+                
+            self.recordStateO = stateO
+            self.recordActionO = actionO    
+            if self.environment.terminal_state():
+                self.environment.process_rewards(pastState = stateO,currentState=statePrime,agentMarker='O')
+                rewardO = self.environment.get_last_rewardO()
+                self.agentO.observe_reward(stateO,actionO,statePrime,rewardO)
+                
+
+                            
             
             rewardX = self.environment.get_last_rewardX()
             #Update agent policy
             self.agentX.observe_reward(stateX,actionX,statePrime,rewardX)
             
-            rewardO = self.environment.get_last_rewardO()
-            self.agentO.observe_reward(stateO,actionO,statePrime,rewardO)
+            
             #Record step, if required
             self.experimentRecorder.track_step(stateX,actionX,actionO,statePrime,rewardX,rewardO)
             
@@ -132,7 +150,9 @@ class ExperimentCheckers:
             #Check if the episode is over
             if self.environment.terminal_state():
                 self.currentEpisode += 1
-                self.experimentRecorder.end_episode(won = self.environment.won)
+                self.recordStateO = None
+                self.recordActionO = None
+                self.experimentRecorder.end_episode(finalState = self.environment.currentState)
                 self.environment.reset()                
                 #Changes the learning agent side
                 self.swap_agents()

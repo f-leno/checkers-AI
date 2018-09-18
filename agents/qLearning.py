@@ -5,21 +5,25 @@
 
 """
 
+import math
+
 from agents.agent import Agent
 
+import numpy as np
 from randomSeeds.randomseeds import Seeds
-import math
-from agents.expertTicTacToeAgent import ExpertTicTacToeAgent
+from game import CHECKERS_FEATURE_COUNT
+from environment.checkersEnvironment import REWARD_WIN,REWARD_LOSE
 
 class QLearningAgent(Agent):
     gamma = None
     alpha = None
     
     qWeights = None
+    #qBias = None
     initQ = None #Value to initiate the weights
     
     USE_EPSILON_GREEDY = True #If false, uses Boltzmann exploration
-    epsilon = 0.1
+    epsilon = 0.5
     
 
     
@@ -32,8 +36,8 @@ class QLearningAgent(Agent):
    
  
         
-    
-    def __init__(self,gamma=0.99, alpha=0.2, marker=None):
+    #gamma=0.99, alpha=0.2
+    def __init__(self,alpha=0.01, gamma=0.1, marker=None):
         """
             gamma: discount factor
             alpha: learning rate
@@ -44,38 +48,45 @@ class QLearningAgent(Agent):
         self.alpha = alpha
         self.marker = marker
         
-        self.initQ = 0.001
-        
-        
-        self.T = self.tempInit;
         self.rnd = Seeds().Q_AGENT_SEED
         
-                
+        self.initQ = 0.001
+        #Initiating weights with value = self.initQ
+        self.qWeights = np.multiply([1]*CHECKERS_FEATURE_COUNT,self.rnd.random()*self.initQ)
+        #self.qBias = 0.001
         
-    
+        self.T = self.tempInit;
+        
+        
+                    
     def observe_reward(self,state,action,statePrime,reward):
         """
             Updates the Q-table (only if the agent is exploring
         """
         if self.exploring:
             allActionsPrime = self.environment.get_actions(statePrime)
+        
            
-           
-            qValue, features = self.calcQTable(state,action)
+            qValue, features = self.calcQTable(state,action,returnFeatures=True)
             V = self.get_max_Q_value(statePrime,allActionsPrime)
             expected = reward + self.gamma * V
             
             temporal_difference = expected - qValue         
 
             for i in range(len(self.qWeights)):
-                self.qWeights[i] = self.qWeights[i] + self.alpha * (temporal_difference) * features[i] 
+                self.qWeights[i] = self.qWeights[i] + self.alpha * (temporal_difference) * features[i]
+            #self.qBias += self.alpha * temporal_difference * self.qBias
+            #print(str(self.qWeights))#+ " - " + str(self.qBias)) 
             
-    def calcQTable(self,state,action):             
+    def calcQTable(self,state,action,returnFeatures=False):             
         """Returns one value from the Qtable"""
         features = self.process_state(state,action)
-        qValue = np.dot(self.weights, features)
+        qValue = np.dot(self.qWeights, features) #+ self.qBias
         
-        return qValue,features  
+        if returnFeatures:
+            return qValue,features
+        
+        return qValue  
     
     def best_action_deterministic(self,state):
         allActions = self.environment.get_actions(state)

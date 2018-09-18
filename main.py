@@ -5,6 +5,15 @@
     Author: Felipe Leno (f.leno@usp.br)
 
 """
+import argparse
+import sys
+
+from agents.expertCheckersAgent import ExpertCheckersAgent
+from experiment.experiment import ExperimentCheckers
+from output.discRewardExperimentRecorder import DiscRewardExperimentRecorder
+from randomSeeds.randomseeds import Seeds
+from agents.randomAgent import RandomAgent
+
 
 def get_args():
     """Arguments for the experiment
@@ -28,11 +37,11 @@ def get_args():
     
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('-l','--learning_time',type=int, default=15000)
+    parser.add_argument('-l','--learning_time',type=int, default=50000)
     parser.add_argument('-s','--stopping_criterion',choices=['episode,step'],default="step")
-    parser.add_argument('-i','--interval',type=int,  default=150)
+    parser.add_argument('-i','--interval',type=int,  default=500)
     parser.add_argument('-t','--trial',type=int,  default=1) 
-    parser.add_argument('-d','--duration',type=int, default=16)
+    parser.add_argument('-d','--duration',type=int, default=5)
     parser.add_argument('-a','--algorithm',default='qLearning:QLearningAgent')
     parser.add_argument('-r','--recording_mode',choices=['null','reward'],default="null")
     parser.add_argument('-o','--out',default='./results/')
@@ -112,7 +121,7 @@ def main():
     
 
     
-    #Creates references for the agents
+    #Creates references for the agents_checker
     learningAgent = build_agent(parameter)
     
     if parameter.expert_optimality < 1.0 and parameter.train_env != "transfer_fs":

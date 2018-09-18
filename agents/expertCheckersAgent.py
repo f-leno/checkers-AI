@@ -6,6 +6,7 @@
 """
 import math
 from agents.agent import Agent
+import agents_checker as agents
 
 from randomSeeds.randomseeds import Seeds
 

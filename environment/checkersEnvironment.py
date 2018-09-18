@@ -18,7 +18,7 @@ class CheckersEnvironment():
     
     #Agents controlling the X and O marks
     agentX = None
-    agentY = None
+    agentO = None
     
     #Variable to store current state and return it more quickly
     currentState = None
@@ -46,6 +46,7 @@ class CheckersEnvironment():
         self.reset()
         
     def reset(self):
+        self.num_moves = 0
         self.checkersControl = checkers.ClassicGameRules().new_game(first_agent=self.agentX, second_agent=self.agentO, first_agent_turn=True, quiet=True)
         #The current state is updated
         self.process_state()
@@ -55,11 +56,11 @@ class CheckersEnvironment():
         self.rewardX = REWARD_DEFAULT
         
         self.terminal = False
-        self.num_moves = 0
+        
     
     def set_agents(self,agentO,agentX):
         """
-            Stores a reference to the agents
+            Stores a reference to the agents_checker
         """
         self.agentX = agentX
         self.agentO = agentO
@@ -80,8 +81,7 @@ class CheckersEnvironment():
         self.num_moves += 1
         
         self.process_state()
-        #Process rewards
-        self.process_rewards()
+
         
     def process_state(self):
         """ 
@@ -91,47 +91,37 @@ class CheckersEnvironment():
         self.currentState = self.checkersControl.game_state
         self.terminal = self.currentState.is_game_over() or self.num_moves > self.checkersControl.rules.max_moves
             
-    def process_rewards(self):  
+    def process_rewards(self,pastState,currentState,agentMarker):  
         """
-            Prepares rewards for both agents
+            Prepares rewards for both agents_checker
         """ 
-        if self.terminal and self.num_moves <= self.checkersControl.rules.max_moves:
-            self.rewardX = REWARD_WIN if self.currentState.is_first_agent_win() else REWARD_LOSE
-            self.rewardO = REWARD_WIN if self.currentState.is_second_agent_win() else REWARD_LOSE
+        if  agentMarker == 'X':
+            self.rewardX = 0
+        elif agentMarker == 'O':
+            self.rewardO = 0
+        if currentState.is_game_over():
+            if  agentMarker == 'X':
+                self.rewardX = REWARD_WIN if self.currentState.is_first_agent_win() else REWARD_LOSE
+            elif agentMarker == 'O':
+                self.rewardO = REWARD_WIN if self.currentState.is_second_agent_win() else REWARD_LOSE
         else:
 
             #Calculating Reward for agent 1
-            agent_ind = 0 
-            oppn_ind = 1 
-
-            num_pieces_list = self.lastState.get_pieces_and_kings()
-            agent_pawns = num_pieces_list[agent_ind]
-            agent_kings = num_pieces_list[agent_ind + 2]
-            oppn_pawns = num_pieces_list[oppn_ind]
-            oppn_kings = num_pieces_list[oppn_ind + 2]
-
-            num_pieces_list_n = self.currentState.get_pieces_and_kings()
-            agent_pawns_n = num_pieces_list_n[agent_ind]
-            agent_kings_n = num_pieces_list_n[agent_ind + 2]
-            oppn_pawns_n = num_pieces_list_n[oppn_ind]
-            oppn_kings_n = num_pieces_list_n[oppn_ind + 2]
-            r_1 = agent_pawns - agent_pawns_n
-            r_2 = agent_kings - agent_kings_n
-            r_3 = oppn_pawns - oppn_pawns_n
-            r_4 = oppn_kings - oppn_kings_n
-            self.rewardX = r_3 * 0.2 + r_4 * 0.3 + r_1 * (-0.4) + r_2 * (-0.5)
-             
-            #Calculating Reward for agent 2
-            agent_ind = 1
-            oppn_ind = 0
+            if agentMarker == 'X':
+                agent_ind = 0 
+                oppn_ind = 1 
+            elif agentMarker == 'O': 
+                #Calculating Reward for agent 2
+                agent_ind = 1
+                oppn_ind = 0
             
-            num_pieces_list = self.lastState.get_pieces_and_kings()
+            num_pieces_list = pastState.get_pieces_and_kings()
             agent_pawns = num_pieces_list[agent_ind]
             agent_kings = num_pieces_list[agent_ind + 2]
             oppn_pawns = num_pieces_list[oppn_ind]
             oppn_kings = num_pieces_list[oppn_ind + 2]
 
-            num_pieces_list_n = self.currentState.get_pieces_and_kings()
+            num_pieces_list_n = currentState.get_pieces_and_kings()
             agent_pawns_n = num_pieces_list_n[agent_ind]
             agent_kings_n = num_pieces_list_n[agent_ind + 2]
             oppn_pawns_n = num_pieces_list_n[oppn_ind]
@@ -140,11 +130,17 @@ class CheckersEnvironment():
             r_2 = agent_kings - agent_kings_n
             r_3 = oppn_pawns - oppn_pawns_n
             r_4 = oppn_kings - oppn_kings_n
-            self.rewardO = r_3 * 0.2 + r_4 * 0.3 + r_1 * (-0.4) + r_2 * (-0.5)
+            reward = r_3 * 0.2 + r_4 * 0.3 + r_1 * (-0.4) + r_2 * (-0.5)
 
-        if self.rewardX == 0:
+            if agentMarker == 'X':
+                self.rewardX = reward 
+            elif agentMarker == 'O': 
+                self.rewardO = reward
+
+     
+        if self.rewardX == 0 and agentMarker == 'X':
             self.rewardX = REWARD_DEFAULT
-        if self.rewardO == 0:
+        if self.rewardO == 0 and agentMarker == 'O':
             self.rewardO = REWARD_DEFAULT
                 
     def get_last_rewardO(self):

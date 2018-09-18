@@ -61,7 +61,7 @@ class ExperimentPolicyPick(ExperimentTicTacToe):
         """
             Runs the experiment according to the given parameters
         """
-        #Give references to agents and environment
+        #Give references to agents_checker and environment
         self.agentO.set_environment(self.environment, "O")
         self.agentX.set_environment(self.environment, "X")
         self.environment.set_agents(self.agentO,self.agentX)
@@ -69,7 +69,7 @@ class ExperimentPolicyPick(ExperimentTicTacToe):
         
         #Main perception-action loop
         while not self.stop_learning():
-            #In this loop the turn of the two agents will be processed, unless the game is over
+            #In this loop the turn of the two agents_checker will be processed, unless the game is over
             stateX = self.environment.get_state()
             #Get agent action
             actionX = self.agentX.select_action(stateX)
@@ -136,7 +136,7 @@ class ExperimentPolicyPick(ExperimentTicTacToe):
                 self.learnersMarker = "X" if self.learnersMarker== "O" else "O"
                 
                 self.check_change_fict()
-                #Give references to agents and environment
+                #Give references to agents_checker and environment
                 self.agentO.set_environment(self.environment, "O")
                 self.agentX.set_environment(self.environment, "X")
                 self.environment.set_agents(self.agentO,self.agentX)
