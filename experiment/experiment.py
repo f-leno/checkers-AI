@@ -98,6 +98,7 @@ class ExperimentCheckers:
         actionO = None
         #Main perception-action loop
         while not self.stop_learning():
+            doubleUpdate = False
             #In this loop the turn of the two agents_checker will be processed, unless the game is over
             stateX = self.environment.get_state()
             #Get agent action
@@ -113,14 +114,14 @@ class ExperimentCheckers:
                 #Making the move...         
                 actionO = self.agentO.select_action(stateO)
                 self.environment.step(actionO)
+                doubleUpdate = True
 
                 
 
             #Updating...
             statePrime = self.environment.get_state()
             
-            #Process rewards for agent X
-            self.environment.process_rewards(pastState = stateX,currentState=statePrime,agentMarker='X')
+            
             
             #Process rewards for agent O
             if self.recordStateO is not None:
@@ -130,14 +131,15 @@ class ExperimentCheckers:
                 
             self.recordStateO = stateO
             self.recordActionO = actionO    
-            if self.environment.terminal_state():
+            if self.environment.terminal_state() and doubleUpdate:
                 self.environment.process_rewards(pastState = stateO,currentState=statePrime,agentMarker='O')
                 rewardO = self.environment.get_last_rewardO()
                 self.agentO.observe_reward(stateO,actionO,statePrime,rewardO)
                 
 
                             
-            
+            #Process rewards for agent X
+            self.environment.process_rewards(pastState = stateX,currentState=statePrime,agentMarker='X')
             rewardX = self.environment.get_last_rewardX()
             #Update agent policy
             self.agentX.observe_reward(stateX,actionX,statePrime,rewardX)

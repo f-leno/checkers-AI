@@ -76,7 +76,12 @@ class QLearningAgent(Agent):
             for i in range(len(self.qWeights)):
                 self.qWeights[i] = self.qWeights[i] + self.alpha * (temporal_difference) * features[i]
             #self.qBias += self.alpha * temporal_difference * self.qBias
-            #print(str(self.qWeights))#+ " - " + str(self.qBias)) 
+            #print(str(self.qWeights))#+ " - " + str(self.qBias))
+            if self.epsilon > 0.05:
+                self.epsilon /= 1.0001
+            if self.alpha > 0.001:
+                self.alpha /= 1.00001
+            #print(self.alpha) 
             
     def calcQTable(self,state,action,returnFeatures=False):             
         """Returns one value from the Qtable"""
@@ -119,7 +124,7 @@ class QLearningAgent(Agent):
             
         for action in allActions:
             qValue = self.calcQTable(state,action)
-            vBoltz = math.pow(math.e,qValue/self.T)
+            vBoltz = math.pow(math.e,qValue/self.T) + 0.00001
             valueActions.append(vBoltz)
             sumActions += vBoltz
             

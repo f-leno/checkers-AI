@@ -18,3 +18,8 @@ class RandomAgent(Agent):
         pass
     def select_action(self, state):
         return self.rnd.choice(self.environment.get_actions(state))
+    
+    def set_environment(self,environment,marker):
+        """Connects to the domain environment"""
+        self.environment = environment
+        self.marker = marker 

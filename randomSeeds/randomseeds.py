@@ -6,6 +6,7 @@ import random
 class Seeds:
     class __Seeds:
         Q_AGENT_SEED = 12345
+        SARSA_AGENT_SEED = 12344
         SELFPLAY_AGENT_SEED = 22222
         RANDOM_AGENT_SEED = 11111
         EXPERT_AGENT_SEED = 54312
@@ -24,6 +25,7 @@ class Seeds:
             self.LENO_AGENT_SEED += trial
             self.PROBMOD_AGENT_SEED += trial
             self.NEURALNET_AGENT_SEED += trial
+            self.SARSA_AGENT_SEED += trial
             
             
     instance = None
