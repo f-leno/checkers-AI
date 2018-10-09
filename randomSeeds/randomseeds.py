@@ -6,6 +6,7 @@ import random
 class Seeds:
     class __Seeds:
         Q_AGENT_SEED = 12345
+        DQN_AGENT_SEED = 18345
         SARSA_AGENT_SEED = 12344
         SELFPLAY_AGENT_SEED = 22222
         RANDOM_AGENT_SEED = 11111
@@ -18,6 +19,7 @@ class Seeds:
                
         def __init__(self, trial):
             self.Q_AGENT_SEED += trial
+            self.DQN_AGENT_SEED += trial
             self.SELFPLAY_AGENT_SEED += trial
             self.RANDOM_AGENT_SEED += trial
             self.EXPERT_AGENT_SEED += trial

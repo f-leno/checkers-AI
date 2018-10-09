@@ -155,7 +155,9 @@ class ExperimentCheckers:
                 self.recordStateO = None
                 self.recordActionO = None
                 self.experimentRecorder.end_episode(finalState = self.environment.currentState)
-                self.environment.reset()                
+                self.environment.reset() 
+                rewardO = 0
+                rewardX = 0               
                 #Changes the learning agent side
                 self.swap_agents()
         

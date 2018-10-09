@@ -112,8 +112,9 @@ class GameState:
         return True
 
 
-    def print_board(self):
-        self.board.print_board()
+    def print_board(self,returnText=False):
+        textState = self.board.print_board(returnText=returnText)
+        return textState
 
 
     def player_info(self):

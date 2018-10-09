@@ -7,6 +7,7 @@ methods to run a single game.
 import math
 import copy
 from functools import reduce
+from cgitb import text
 
 
 CHECKERS_FEATURE_COUNT = 8
@@ -320,18 +321,18 @@ class Board:
             return self.P2_K_SYMBOL
 
 
-    def print_board(self):
+    def print_board(self,returnText=False):
         """
         Prints a string representation of the current game board.
         """
-
+        textState = ""
         index_columns = "   "
         for j in range(self.WIDTH):
             index_columns += " " + str(j) + "   " + str(j) + "  "
-        print(index_columns)
+        textState += index_columns + "\n"
 
         norm_line = "  |---|---|---|---|---|---|---|---|"
-        print(norm_line)
+        textState += norm_line + "\n"
 
         for j in range(self.HEIGHT):
             temp_line = str(j) + " "
@@ -343,8 +344,12 @@ class Board:
                 temp_line = temp_line + " " + self.get_symbol([j, i]) + " |"
                 if i != 3 or j % 2 != 1:  # TODO should figure out if this 3 should be changed to self.WIDTH-1
                     temp_line = temp_line + "///|"
-            print(temp_line)
-            print(norm_line)
+            textState += temp_line + "\n"
+            textState += norm_line + "\n"
+        if returnText:
+            return textState
+        print(textState)
+        
 
 
 

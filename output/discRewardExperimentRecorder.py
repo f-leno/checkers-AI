@@ -84,8 +84,8 @@ class DiscRewardExperimentRecorder(ExperimentRecorder):
         if self.useDiscounted:
             self.currentGamma *= self.gamma
         if self.gameStore:
-            sentence = "State_inic - "+self.agentMarker+"\n" + str(state)+ "\n actionX: " + str(actionX)+ ", actionO: " + str(actionO)
-            sentence += "\n State final\n: "+ str(statePrime)+ "\nReward:" + str(rewardX) +","+str(rewardO)+"\n"
+            sentence = "State_inic - "+self.agentMarker+"\n" + state.print_board(True)+ "\n actionX: " + str(actionX)+ ", actionO: " + str(actionO)
+            sentence += "\n State final\n: "+ statePrime.print_board(True)+ "\nReward:" + str(rewardX) +","+str(rewardO)+"\n"
             self.gamesFile.write(sentence)
             self.gamesFile.flush()
         
