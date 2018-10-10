@@ -31,7 +31,7 @@ class DeepQLearningAgent(QLearningAgent):
     
     
     #gamma=0.99, alpha=0.2
-    def __init__(self,alpha=0.01, gamma=0.1, marker=None, batchSize=10000, miniBatchSize = 100,updateFrequency=100):
+    def __init__(self,alpha=0.001, gamma=0.95, marker=None, batchSize=10000, miniBatchSize = 100,updateFrequency=100):
         """
             gamma: discount factor
             alpha: learning rate
@@ -73,7 +73,7 @@ class DeepQLearningAgent(QLearningAgent):
         self.target = keras.models.clone_model(self.network)
         
         self.cost = keras.losses.mean_squared_error
-        self.network.compile(optimizer=keras.optimizers.Adam(),loss=self.cost)
+        self.network.compile(optimizer=keras.optimizers.Adam(lr = self.alpha),loss=self.cost)
         
         
         #self.network.summary()
@@ -84,7 +84,7 @@ class DeepQLearningAgent(QLearningAgent):
         #Targets on target network
         targets = []
         for (features,statePrime,reward) in miniBatch:
-            if statePrime.is_terminal():
+            if statePrime.is_first_agent_win() or statePrime.is_second_agent_win():
                 targets.append(reward)
             else:
                 actions = self.environment.get_actions(statePrime)
@@ -93,13 +93,14 @@ class DeepQLearningAgent(QLearningAgent):
         targets = np.array(targets)
                 
         #Q values on network being updated
-        q_values = self.network.predict_on_batch(featuresOnBatch)
+        #q_values = self.network.predict_on_batch(featuresOnBatch)
         
         
         #Optimization process
-        deltas = self.cost.get_errors(targets,q_values)
-        self.network.bprop(deltas)
-        self.optimizer.optimize(self.network.layers_to_optimize) 
+        self.network.fit(featuresOnBatch,targets,verbose=0)
+        #deltas = self.cost.get_errors(targets,q_values)
+        #self.network.bprop(deltas)
+        #self.optimizer.optimize(self.network.layers_to_optimize) 
         
     def update_target_network(self):
         self.target.set_weights(self.network.get_weights())
@@ -113,11 +114,15 @@ class DeepQLearningAgent(QLearningAgent):
         if self.exploring:
             #Updating batch
             features = self.process_state(state,action)
+            #Clipping between -1 and 1
+            reward = (reward - REWARD_LOSE) / (REWARD_WIN - REWARD_LOSE) * (2) - 1
             self.batch.append((features,statePrime,reward))
-            if len(self.batch > self.batchSize):
+            if len(self.batch) > self.batchSize:
                 del self.batch[0]
-                
-            miniBatch = self.rnd.sample(self.batch, self.miniBatchSize)
+            if len(self.batch) > self.miniBatchSize:    
+                miniBatch = self.rnd.sample(self.batch, self.miniBatchSize)
+            else:
+                miniBatch = self.batch
             self.update_network(miniBatch)
                 
             if self.epsilon > 0.05:
@@ -135,7 +140,7 @@ class DeepQLearningAgent(QLearningAgent):
         if network is None:
             network = self.target
         features = self.process_state(state,action)
-        qValue = network.predict(features) #+ self.qBias
+        qValue = float(network.predict(np.array([features]))) #+ self.qBias
         
         if returnFeatures:
             return qValue,features

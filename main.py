@@ -127,12 +127,12 @@ def main():
     if parameter.expert_optimality < 1.0 and parameter.train_env != "transfer_fs":
         expertTrain = SuboptimalExpert(parameter.expert_optimality)
     else:
-        expertTrain = RandomAgent()#ExpertCheckersAgent() 
+        expertTrain = ExpertCheckersAgent() 
         
     
         
     if parameter.train_env == "transfer_fw":
-        expertEval = RandomAgent()#ExpertCheckersAgent()
+        expertEval = ExpertCheckersAgent()
     elif parameter.train_env == "transfer_fs":
         expertEval = SuboptimalExpert(parameter.expert_optimality)
     else:
